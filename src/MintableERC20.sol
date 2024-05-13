@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.6;
 
-import {ERC20} from '@solmate/tokens/ERC20.sol';
+import {ERC20} from '@openzeppelin/token/ERC20/ERC20.sol';
 
 /**
  * @title  MintableERC20
