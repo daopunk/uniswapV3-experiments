@@ -69,8 +69,8 @@ contract UniswapV3Setup is Test {
   }
 
   function _setupTokens() internal {
-    usdcTkn = new MintableERC20('USDC', 'X', 18);
-    daiTkn = new MintableERC20('DAI', 'Y', 18);
+    usdcTkn = new MintableERC20('USDC', 'USDC', 18);
+    daiTkn = new MintableERC20('DAI', 'DAI', 18);
     tokens[USDC] = address(usdcTkn);
     tokens[DAI] = address(daiTkn);
   }
