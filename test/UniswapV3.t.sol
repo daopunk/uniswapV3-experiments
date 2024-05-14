@@ -24,7 +24,7 @@ contract UniswapV3Init is UniswapV3Setup {
   }
 }
 
-contract UniswapV3InitPreTest is UniswapV3Init {
+contract UniswapV3PreLiquidity is UniswapV3Init {
   function test_initialPrice() public {
     (uint160 _sqrtPriceX96, int24 _tick,,,,, bool _unlocked) = poolLow.slot0();
     emit log_named_uint('SqrtPriceX96 from Pool', _sqrtPriceX96);
@@ -63,12 +63,6 @@ contract UniswapV3InitPreTest is UniswapV3Init {
 
   function test_router() public {
     assertEq(address(poolLow), address(router.pool()));
-  }
-}
-
-contract UniswapV3InitPostTest is UniswapV3Init {
-  function setUp() public virtual override {
-    super.setUp();
   }
 
   /**
@@ -128,7 +122,7 @@ contract UniswapV3InitPostTest is UniswapV3Init {
   }
 }
 
-contract UniswapV3Liquidity is UniswapV3Init {
+contract UniswapV3PostLiquidity is UniswapV3Init {
   int24 public constant LOW_TICK1 = INIT_TICK - TICK_SPACING * 100;
   int24 public constant LOW_TICK2 = LOW_TICK1 - TICK_SPACING * 100;
 
@@ -169,7 +163,7 @@ contract UniswapV3Liquidity is UniswapV3Init {
   }
 }
 
-contract UniswapV3LiquidityExp is UniswapV3Init {
+contract UniswapV3Liquidity is UniswapV3Init {
   /**
    * @notice Bob spent less money for position farther from the SqrtPrice
    */
