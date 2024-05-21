@@ -245,9 +245,11 @@ contract UniswapV3Tick is UniswapV3Init {
    */
   function test_negativeTenAndPositiveTen() public {
     vm.prank(alice);
-    router.addLiquidity(-20, -10, 10_000);
+    emit log_named_uint('liq var before', poolLow.liquidity());
+    router.addLiquidity(-10, 10, 10_000);
     /// liqGross = determine if tick has an active position
     /// liqNet = liquidity removed/added when crossing a tick
+    /// liqDelta = liqBefore +- liqAfter to change the price n amount
     (uint128 _liquidityGrossTop, int128 _liquidityNetTop,,,,,, bool _initializedTop) = poolLow.ticks(-20);
     (uint128 _liquidityGrossBtm, int128 _liquidityNetBtm,,,,,, bool _initializedBtm) = poolLow.ticks(-10);
     emit log_named_uint('liqGross Top', _liquidityGrossTop);
@@ -263,6 +265,7 @@ contract UniswapV3Tick is UniswapV3Init {
     uint256 _tickBitN2 = poolLow.tickBitmap(-2);
     emit log_named_uint('tickBit   -2', _tickBitN2);
     _tokensDifference();
+    emit log_named_uint('liq var after', poolLow.liquidity());
   }
 
   /**
