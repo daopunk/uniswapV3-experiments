@@ -9,8 +9,8 @@ import {MintableERC20} from 'src/MintableERC20.sol';
 import {Router} from 'src/Router.sol';
 
 contract UniswapV3Setup is Test {
-  bytes32 public constant USDC = bytes32('USDC');
-  bytes32 public constant DAI = bytes32('DAI');
+  bytes32 public constant TA = bytes32('TA');
+  bytes32 public constant TB = bytes32('TB');
   uint256 public constant MINT = 100_000 ether;
 
   uint24 public constant FEE_LOW = 500;
@@ -31,8 +31,8 @@ contract UniswapV3Setup is Test {
   Router public router;
 
   // erc20 tokens
-  MintableERC20 public usdcTkn;
-  MintableERC20 public daiTkn;
+  MintableERC20 public tokenA;
+  MintableERC20 public tokenB;
 
   // data structures
   address[] public usrs;
@@ -43,10 +43,10 @@ contract UniswapV3Setup is Test {
 
     factory = new UniswapV3Factory();
 
-    /// @notice USDC = tokenA, DAI = tokenB
-    poolLow = UniswapV3Pool(factory.createPool(tokens[USDC], tokens[DAI], FEE_LOW));
-    poolMed = UniswapV3Pool(factory.createPool(tokens[USDC], tokens[DAI], FEE_MED));
-    poolHigh = UniswapV3Pool(factory.createPool(tokens[USDC], tokens[DAI], FEE_HIGH));
+    /// @notice TA = tokenA, TB = tokenB
+    poolLow = UniswapV3Pool(factory.createPool(tokens[TA], tokens[TB], FEE_LOW));
+    poolMed = UniswapV3Pool(factory.createPool(tokens[TA], tokens[TB], FEE_MED));
+    poolHigh = UniswapV3Pool(factory.createPool(tokens[TA], tokens[TB], FEE_HIGH));
 
     router = new Router(poolLow);
 
@@ -60,27 +60,27 @@ contract UniswapV3Setup is Test {
     usrs[2] = deployer;
     for (uint256 i = 0; i < usrs.length; i++) {
       vm.startPrank(usrs[i]);
-      usdcTkn.mint(MINT);
-      usdcTkn.approve(address(router), MINT);
-      daiTkn.mint(MINT);
-      daiTkn.approve(address(router), MINT);
+      tokenA.mint(MINT);
+      tokenA.approve(address(router), MINT);
+      tokenB.mint(MINT);
+      tokenB.approve(address(router), MINT);
       vm.stopPrank();
     }
   }
 
   function _setupTokens() internal {
-    usdcTkn = new MintableERC20('USDC', 'USDC', 18);
-    daiTkn = new MintableERC20('DAI', 'DAI', 18);
-    tokens[USDC] = address(usdcTkn);
-    tokens[DAI] = address(daiTkn);
+    tokenA = new MintableERC20('TA', 'TA', 18);
+    tokenB = new MintableERC20('TB', 'TB', 18);
+    tokens[TA] = address(tokenA);
+    tokens[TB] = address(tokenB);
   }
 }
 
 contract UniswapV3SetupTest is UniswapV3Setup {
   function test_userBalances() public view {
     for (uint256 i = 0; i < usrs.length; i++) {
-      assertEq(usdcTkn.balanceOf(usrs[i]), MINT);
-      assertEq(daiTkn.balanceOf(usrs[i]), MINT);
+      assertEq(tokenA.balanceOf(usrs[i]), MINT);
+      assertEq(tokenB.balanceOf(usrs[i]), MINT);
     }
   }
 
@@ -89,16 +89,16 @@ contract UniswapV3SetupTest is UniswapV3Setup {
   }
 
   function test_poolTokens() public {
-    if (tokens[USDC] < tokens[DAI]) {
-      assertEq(poolLow.token0(), tokens[USDC]);
-      assertEq(poolLow.token1(), tokens[DAI]);
-      emit log_named_address('token0 is USDC', tokens[USDC]);
-      emit log_named_address('token1 is DAI', tokens[DAI]);
+    if (tokens[TA] < tokens[TB]) {
+      assertEq(poolLow.token0(), tokens[TA]);
+      assertEq(poolLow.token1(), tokens[TB]);
+      emit log_named_address('token0 is TA', tokens[TA]);
+      emit log_named_address('token1 is TB', tokens[TB]);
     } else {
-      assertEq(poolLow.token0(), tokens[DAI]);
-      assertEq(poolLow.token1(), tokens[USDC]);
-      emit log_named_address('token0 is DAI', tokens[DAI]);
-      emit log_named_address('token1 is USDC', tokens[USDC]);
+      assertEq(poolLow.token0(), tokens[TB]);
+      assertEq(poolLow.token1(), tokens[TA]);
+      emit log_named_address('token0 is TB', tokens[TB]);
+      emit log_named_address('token1 is TA', tokens[TA]);
     }
   }
 
