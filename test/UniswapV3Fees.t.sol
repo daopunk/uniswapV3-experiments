@@ -130,3 +130,13 @@ contract UniswapV3FeeDouble is UniswapV3FeeInit {
     assertNotEq(amount1_a, amount1_d);
   }
 }
+
+/**
+ * @notice RARESKILLS PROBLEM 3 & 4
+ *
+ * As tick price moves at rate of 10 ticks per second (tick spacing is 10),
+ * it checks if the tick is initialized, which the lower and upper tick of
+ * each position will be initialized.
+ *
+ * Protocol tracks secondsOutside (either side of an initialized tick, reset when crossing over tick)
+ */
