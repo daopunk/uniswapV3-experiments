@@ -22,7 +22,7 @@ contract UniswapV3FeeInit is UniswapV3Setup {
   int24 public constant HIGH_TICK1 = ZERO_TICK + TICK_SPACING * 10;
   int24 public constant HIGH_TICK2 = HIGH_TICK1 + TICK_SPACING * 10;
 
-  uint128 public constant DEPOSIT = 10_000 ether;
+  uint128 public constant DEPOSIT = 50_000 ether;
   Router public routerH;
 
   function setUp() public virtual override {
@@ -33,7 +33,7 @@ contract UniswapV3FeeInit is UniswapV3Setup {
     poolHigh.initialize(SQRT_PRICE_X96);
 
     vm.prank(alice);
-    routerH.addLiquidity(-2000, 2000, DEPOSIT * 2);
+    routerH.addLiquidity(-2000, 2000, DEPOSIT);
 
     vm.warp(block.timestamp + 10);
     vm.roll(block.number + 10);
@@ -48,11 +48,22 @@ contract UniswapV3FeeInit is UniswapV3Setup {
 
 contract UniswapV3Fee is UniswapV3FeeInit {
   function testCollectFee() public {
-    vm.warp(block.timestamp + 10);
-    vm.roll(block.number + 10);
     vm.startPrank(alice);
-    routerH.addLiquidity(-887_200, 887_200, DEPOSIT / 2);
-    poolHigh.collect(alice, MIN_TICK, MAX_TICK, type(uint128).max, type(uint128).max);
+    // `burn` happens in NonfungiblePositionManager
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+    (uint256 amount0, uint256 amount1) = poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    assertGt(amount0, 0);
+    assertGt(amount1, 0);
+
+    // fees were already burned, so revert
+    vm.expectRevert();
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+
+    // no more fees to collect, since entire deposit was previously burned
+    (uint256 amount0_x2, uint256 amount1_x2) =
+      poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    assertEq(amount0_x2, 0);
+    assertEq(amount1_x2, 0);
     vm.stopPrank();
   }
 }
