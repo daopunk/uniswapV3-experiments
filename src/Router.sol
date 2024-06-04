@@ -4,8 +4,9 @@ pragma solidity 0.7.6;
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
 import {UniswapV3Pool, IUniswapV3Pool} from '@uniswapv3/UniswapV3Pool.sol';
 import {IUniswapV3MintCallback} from '@uniswapv3/interfaces/callback/IUniswapV3MintCallback.sol';
+import {IUniswapV3SwapCallback} from '@uniswapv3/interfaces/callback/IUniswapV3SwapCallback.sol';
 
-contract Router is IUniswapV3MintCallback {
+contract Router is IUniswapV3MintCallback, IUniswapV3SwapCallback {
   IUniswapV3Pool public pool;
   address private _caller;
   bool private _locked;
@@ -43,5 +44,11 @@ contract Router is IUniswapV3MintCallback {
     require(address(pool) == msg.sender, 'NotAuthed');
     IERC20(pool.token0()).transferFrom(_caller, address(pool), amount0Owed);
     IERC20(pool.token1()).transferFrom(_caller, address(pool), amount1Owed);
+  }
+
+  function uniswapV3SwapCallback(int256 amount0Delta, int256 amount1Delta, bytes calldata data) external override {
+    require(address(pool) == msg.sender, 'NotAuthed');
+    if (amount0Delta > 0) IERC20(pool.token0()).transferFrom(_caller, address(pool), uint256(amount0Delta));
+    else IERC20(pool.token1()).transferFrom(_caller, address(pool), uint256(amount1Delta));
   }
 }

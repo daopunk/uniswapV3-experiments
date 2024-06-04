@@ -20,6 +20,7 @@ contract UniswapV3Setup is Test {
   address public deployer = address(this);
   address public alice = address(0xa11ce);
   address public bob = address(0xb0b);
+  address public cara = address(0xca7a);
 
   /// uniswap contracts
   UniswapV3Factory public factory;
@@ -50,20 +51,20 @@ contract UniswapV3Setup is Test {
 
     router = new Router(poolLow);
 
-    _setupUsers();
+    _setupUsers(router);
   }
 
-  function _setupUsers() public {
+  function _setupUsers(Router _router) public {
     usrs = new address[](3);
     usrs[0] = alice;
     usrs[1] = bob;
-    usrs[2] = deployer;
+    usrs[2] = cara;
     for (uint256 i = 0; i < usrs.length; i++) {
       vm.startPrank(usrs[i]);
       tokenA.mint(MINT);
-      tokenA.approve(address(router), MINT);
+      tokenA.approve(address(_router), MINT);
       tokenB.mint(MINT);
-      tokenB.approve(address(router), MINT);
+      tokenB.approve(address(_router), MINT);
       vm.stopPrank();
     }
   }
