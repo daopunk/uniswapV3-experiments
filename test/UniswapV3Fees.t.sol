@@ -31,12 +31,15 @@ contract UniswapV3FeeInit is UniswapV3Setup {
     _setupUsers(routerH);
 
     poolHigh.initialize(SQRT_PRICE_X96);
+  }
+}
 
+/// @notice RARESKILLS PROBLEM 1
+contract UniswapV3FeeSingle is UniswapV3FeeInit {
+  function setUp() public virtual override {
+    super.setUp();
     vm.prank(alice);
     routerH.addLiquidity(-2000, 2000, DEPOSIT);
-
-    vm.warp(block.timestamp + 10);
-    vm.roll(block.number + 10);
 
     vm.prank(bob);
     routerH.swap(true, 100 ether, 1 ether);
@@ -44,9 +47,7 @@ contract UniswapV3FeeInit is UniswapV3Setup {
     vm.prank(cara);
     routerH.swap(true, 10 ether, 100 ether);
   }
-}
 
-contract UniswapV3Fee is UniswapV3FeeInit {
   function testCollectFee() public {
     vm.startPrank(alice);
     // `burn` happens in NonfungiblePositionManager
@@ -65,5 +66,67 @@ contract UniswapV3Fee is UniswapV3FeeInit {
     assertEq(amount0_x2, 0);
     assertEq(amount1_x2, 0);
     vm.stopPrank();
+  }
+}
+
+/// @notice RARESKILLS PROBLEM 2
+contract UniswapV3FeeDouble is UniswapV3FeeInit {
+  function setUp() public virtual override {
+    super.setUp();
+    vm.prank(alice);
+    routerH.addLiquidity(-2000, 2000, DEPOSIT);
+
+    vm.prank(deb);
+    routerH.addLiquidity(-2000, 2000, DEPOSIT);
+
+    vm.prank(bob);
+    routerH.swap(true, 100 ether, 1 ether);
+
+    vm.prank(cara);
+    routerH.swap(true, 10 ether, 100 ether);
+  }
+
+  /**
+   * @notice alice & deb have same exact position,
+   * thus same `CollectParams.tokenId` that tracks the fees,
+   * so if they burn & collect at the same time, the fees
+   * will be distributed 50/50
+   */
+  function testCollectFeeEqual() public {
+    vm.startPrank(alice);
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+    (uint256 amount0_a, uint256 amount1_a) = poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    vm.stopPrank();
+
+    vm.startPrank(deb);
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+    (uint256 amount0_d, uint256 amount1_d) = poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    vm.stopPrank();
+
+    assertEq(amount0_a, amount0_d);
+    assertEq(amount1_a, amount1_d);
+  }
+
+  /**
+   * @notice alice & deb have same exact position,
+   * but alice burn/collects fees before bob swaps, then
+   * deb burn/collects fees, so she gets additional fees
+   */
+  function testCollectFeeNotEqual() public {
+    vm.startPrank(alice);
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+    (uint256 amount0_a, uint256 amount1_a) = poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    vm.stopPrank();
+
+    vm.prank(bob);
+    routerH.swap(true, 90 ether, 1 ether);
+
+    vm.startPrank(deb);
+    poolHigh.burn(-2000, 2000, DEPOSIT);
+    (uint256 amount0_d, uint256 amount1_d) = poolHigh.collect(alice, -2000, 2000, type(uint128).max, type(uint128).max);
+    vm.stopPrank();
+
+    assertNotEq(amount0_a, amount0_d);
+    assertNotEq(amount1_a, amount1_d);
   }
 }

@@ -21,6 +21,7 @@ contract UniswapV3Setup is Test {
   address public alice = address(0xa11ce);
   address public bob = address(0xb0b);
   address public cara = address(0xca7a);
+  address public deb = address(0xdeb);
 
   /// uniswap contracts
   UniswapV3Factory public factory;
@@ -55,10 +56,11 @@ contract UniswapV3Setup is Test {
   }
 
   function _setupUsers(Router _router) public {
-    usrs = new address[](3);
+    usrs = new address[](4);
     usrs[0] = alice;
     usrs[1] = bob;
     usrs[2] = cara;
+    usrs[3] = deb;
     for (uint256 i = 0; i < usrs.length; i++) {
       vm.startPrank(usrs[i]);
       tokenA.mint(MINT);

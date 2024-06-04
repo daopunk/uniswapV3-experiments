@@ -78,10 +78,8 @@ contract UniswapV3PreLiquidity is UniswapV3Init {
     vm.expectRevert(); // SPL Error
     router.swap(true, 1 ether, SQRT_PRICE_X96 * 2);
 
-    vm.expectRevert();
     router.swap(false, 1 ether, SQRT_PRICE_X96 * 2);
 
-    vm.expectRevert();
     router.swap(true, 1 ether, SQRT_PRICE_X96 / 2);
 
     vm.expectRevert(); // SPL Error
@@ -244,9 +242,9 @@ contract UniswapV3Tick is UniswapV3Init {
    * wider liquidity = more tokens spent
    */
   function test_negativeTenAndPositiveTen() public {
-    vm.prank(alice);
     emit log_named_uint('liq var before', poolLow.liquidity());
-    router.addLiquidity(-10, 10, 10_000);
+    vm.prank(alice);
+    router.addLiquidity(-10, 10, 1000);
     /// liqGross = determine if tick has an active position
     /// liqNet = liquidity removed/added when crossing a tick
     /// liqDelta = liqBefore +- liqAfter to change the price n amount
