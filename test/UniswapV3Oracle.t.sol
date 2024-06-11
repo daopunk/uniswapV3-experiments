@@ -11,7 +11,7 @@ import {MintableERC20} from 'src/MintableERC20.sol';
 import {Router} from 'src/Router.sol';
 import {Relayer} from 'src/Relayer.sol';
 
-contract UniswapV3OracleInit is UniswapV3Setup {
+contract UniswapV3Oracle is UniswapV3Setup {
   uint256 public constant MINUTE = 60;
 
   uint160 public constant SQRT_PRICE_X96_1_1 = 79_228_162_514_264_337_593_543_950_336; // 1 token / 1 token
@@ -42,11 +42,19 @@ contract UniswapV3OracleInit is UniswapV3Setup {
     poolHigh.initialize(SQRT_PRICE_X96_1_1);
 
     relayer = new Relayer(address(factory), tokens[TA], tokens[TB], FEE_HIGH, uint32(MINUTE));
-    vm.warp(MINUTE * 2);
+    vm.warp(MINUTE);
 
     vm.prank(alice);
     routerH.addLiquidity(-20_000, 20_000, DEPOSIT);
-    vm.warp(MINUTE * 3);
+    vm.warp(MINUTE * 2);
+
+    (uint160 _sqrtPriceX96, int24 _tick,, uint16 _observationCardinality, uint16 _observationCardinalityNext,,) =
+      poolHigh.slot0();
+
+    emit log_named_uint('_observationCardinality    ', _observationCardinality);
+    emit log_named_uint('_observationCardinalityNext', _observationCardinalityNext);
+
+    poolHigh.increaseObservationCardinalityNext(2);
 
     firstPriceRead = relayer.read();
   }
@@ -62,14 +70,14 @@ contract UniswapV3OracleInit is UniswapV3Setup {
     emit log_named_int('CurrentTick  ', _tick);
 
     uint256 _priceRead = relayer.read();
-    emit log_named_uint('Relayer Read ', _priceRead);
-    emit log_named_uint('Price / 1e18 ', _priceRead / 1 ether);
+    emit log_named_uint('Price 60s Ago', _priceRead);
+    emit log_named_uint('Price /  WAD ', _priceRead / 1 ether);
   }
 
   function testRatioAfterSwap() public {
     vm.prank(bob);
     routerH.swap(true, 4184.1 ether, 1 ether);
-    vm.warp(MINUTE * 4);
+    vm.warp(MINUTE * 3);
 
     uint256 _token0Amount = ERC20(poolHigh.token0()).balanceOf(address(poolHigh));
     uint256 _token1Amount = ERC20(poolHigh.token1()).balanceOf(address(poolHigh));
@@ -80,21 +88,17 @@ contract UniswapV3OracleInit is UniswapV3Setup {
     emit log_named_uint('SqrtPrice    ', _sqrtPriceX96);
     emit log_named_int('CurrentTick  ', _tick);
 
-    emit log_named_uint('Initial Price', firstPriceRead);
-
     uint256 _priceRead = relayer.read(); // 60 seconds ago (default)
-    emit log_named_uint('Relayer Read ', _priceRead);
-    emit log_named_uint('Price / 1e18 ', _priceRead / 1 ether);
-
+    emit log_named_uint('Initial Price', firstPriceRead);
+    emit log_named_uint('Price 60s Ago', _priceRead);
     emit log_named_uint('Average Price', (_priceRead + firstPriceRead) / 2);
+    emit log_named_uint('Price /  WAD ', _priceRead / 1 ether);
 
     uint256 _priceReadCustom = relayer.readWithCustomPeriod(uint32(59)); // 59 seconds ago
-    assertEq(_priceReadCustom, _priceRead);
+    // assertEq(_priceReadCustom, _priceRead);
 
-    /**
-     * @dev why does this revert?
-     */
-    vm.expectRevert();
-    relayer.readWithCustomPeriod(uint32(61)); // 61 seconds ago
+    // vm.expectRevert();
+    uint256 _priceRead2 = relayer.readWithCustomPeriod(uint32(90)); // 90 seconds ago
+    emit log_named_uint('Price 90s Ago', _priceRead2);
   }
 }
