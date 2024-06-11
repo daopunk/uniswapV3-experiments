@@ -4,12 +4,12 @@ pragma abicoder v2;
 
 import {UniswapV3Setup} from 'test/UniswapV3Setup.t.sol';
 import {SafeMath} from '@openzeppelin/math/SafeMath.sol';
-import {IUniswapV3MintCallback} from '@uniswapv3/interfaces/callback/IUniswapV3MintCallback.sol';
+import {IUniswapV3MintCallback} from 'lib/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.sol';
 import {MintableERC20} from 'src/MintableERC20.sol';
 import {Router} from 'src/Router.sol';
 
 contract UniswapV3FeeInit is UniswapV3Setup {
-  uint160 public constant SQRT_PRICE_X96 = 79_228_162_514_264_337_593_543_950_336; // 1 token / 20 tokens
+  uint160 public constant SQRT_PRICE_X96 = 79_228_162_514_264_337_593_543_950_336;
 
   int24 public constant INIT_TICK = -29_959;
   int24 public constant ZERO_TICK = 0;

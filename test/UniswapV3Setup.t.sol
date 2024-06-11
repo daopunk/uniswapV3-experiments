@@ -3,8 +3,8 @@ pragma solidity 0.7.6;
 pragma abicoder v2;
 
 import {Test, console} from 'forge-std/Test.sol';
-import {UniswapV3Factory, IUniswapV3Factory} from '@uniswapv3/UniswapV3Factory.sol';
-import {UniswapV3Pool, IUniswapV3Pool} from '@uniswapv3/UniswapV3Pool.sol';
+import {UniswapV3Factory, IUniswapV3Factory} from 'lib/v3-core/contracts/UniswapV3Factory.sol';
+import {UniswapV3Pool, IUniswapV3Pool} from 'lib/v3-core/contracts/UniswapV3Pool.sol';
 import {MintableERC20} from 'src/MintableERC20.sol';
 import {Router} from 'src/Router.sol';
 

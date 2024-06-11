@@ -4,7 +4,7 @@ pragma abicoder v2;
 
 import {UniswapV3Setup} from 'test/UniswapV3Setup.t.sol';
 import {SafeMath} from '@openzeppelin/math/SafeMath.sol';
-import {IUniswapV3MintCallback} from '@uniswapv3/interfaces/callback/IUniswapV3MintCallback.sol';
+import {IUniswapV3MintCallback} from 'lib/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.sol';
 import {MintableERC20} from 'src/MintableERC20.sol';
 
 contract UniswapV3Init is UniswapV3Setup {

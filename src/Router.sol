@@ -2,9 +2,9 @@
 pragma solidity 0.7.6;
 
 import {IERC20} from '@openzeppelin/token/ERC20/IERC20.sol';
-import {UniswapV3Pool, IUniswapV3Pool} from '@uniswapv3/UniswapV3Pool.sol';
-import {IUniswapV3MintCallback} from '@uniswapv3/interfaces/callback/IUniswapV3MintCallback.sol';
-import {IUniswapV3SwapCallback} from '@uniswapv3/interfaces/callback/IUniswapV3SwapCallback.sol';
+import {UniswapV3Pool, IUniswapV3Pool} from 'lib/v3-core/contracts/UniswapV3Pool.sol';
+import {IUniswapV3MintCallback} from 'lib/v3-core/contracts/interfaces/callback/IUniswapV3MintCallback.sol';
+import {IUniswapV3SwapCallback} from 'lib/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol';
 
 contract Router is IUniswapV3MintCallback, IUniswapV3SwapCallback {
   IUniswapV3Pool public pool;
