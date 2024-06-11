@@ -32,7 +32,17 @@ contract Relayer {
 
   function read() external view returns (uint256 _price) {
     (int24 _arithmeticMeanTick,) = OracleLibrary.consult(uniV3Pool, quotePeriod);
-    uint256 _quoteAmount = OracleLibrary.getQuoteAtTick({
+    _price = OracleLibrary.getQuoteAtTick({
+      tick: _arithmeticMeanTick,
+      baseAmount: uint128(1e18),
+      baseToken: baseToken,
+      quoteToken: quoteToken
+    });
+  }
+
+  function readWithCustomPeriod(uint32 _quotePeriod) external view returns (uint256 _price) {
+    (int24 _arithmeticMeanTick,) = OracleLibrary.consult(uniV3Pool, _quotePeriod);
+    _price = OracleLibrary.getQuoteAtTick({
       tick: _arithmeticMeanTick,
       baseAmount: uint128(1e18),
       baseToken: baseToken,
