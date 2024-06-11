@@ -48,24 +48,21 @@ contract UniswapV3Oracle is UniswapV3Setup {
     routerH.addLiquidity(-20_000, 20_000, DEPOSIT);
     vm.warp(MINUTE * 2);
 
-    (uint160 _sqrtPriceX96, int24 _tick,, uint16 _observationCardinality, uint16 _observationCardinalityNext,,) =
-      poolHigh.slot0();
-
-    emit log_named_uint('_observationCardinality    ', _observationCardinality);
-    emit log_named_uint('_observationCardinalityNext', _observationCardinalityNext);
-
-    poolHigh.increaseObservationCardinalityNext(2);
-
     firstPriceRead = relayer.read();
   }
 
   function testRatio() public {
+    (uint160 _sqrtPriceX96, int24 _tick,, uint16 _observationCardinality, uint16 _observationCardinalityNext,,) =
+      poolHigh.slot0();
+
+    emit log_named_uint('observationCardinality    ', _observationCardinality);
+    emit log_named_uint('observationCardinalityNext', _observationCardinalityNext);
+
     uint256 _token0Amount = ERC20(poolHigh.token0()).balanceOf(address(poolHigh));
     uint256 _token1Amount = ERC20(poolHigh.token1()).balanceOf(address(poolHigh));
     emit log_named_uint('token0 amount', _token0Amount);
     emit log_named_uint('token1 amount', _token1Amount);
 
-    (uint160 _sqrtPriceX96, int24 _tick,,,,,) = poolHigh.slot0();
     emit log_named_uint('SqrtPrice    ', _sqrtPriceX96);
     emit log_named_int('CurrentTick  ', _tick);
 
@@ -75,6 +72,12 @@ contract UniswapV3Oracle is UniswapV3Setup {
   }
 
   function testRatioAfterSwap() public {
+    poolHigh.increaseObservationCardinalityNext(2);
+    (,,, uint16 _observationCardinality, uint16 _observationCardinalityNext,,) = poolHigh.slot0();
+
+    emit log_named_uint('observationCardinality    ', _observationCardinality);
+    emit log_named_uint('observationCardinalityNext', _observationCardinalityNext);
+
     vm.prank(bob);
     routerH.swap(true, 4184.1 ether, 1 ether);
     vm.warp(MINUTE * 3);
@@ -92,7 +95,6 @@ contract UniswapV3Oracle is UniswapV3Setup {
     emit log_named_uint('Initial Price', firstPriceRead);
     emit log_named_uint('Price 60s Ago', _priceRead);
     emit log_named_uint('Average Price', (_priceRead + firstPriceRead) / 2);
-    emit log_named_uint('Price /  WAD ', _priceRead / 1 ether);
 
     uint256 _priceReadCustom = relayer.readWithCustomPeriod(uint32(59)); // 59 seconds ago
     // assertEq(_priceReadCustom, _priceRead);
